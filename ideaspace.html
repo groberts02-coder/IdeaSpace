@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="IdeaSpace" />
+  <title>IdeaSpace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --adult-bg: #F8F8F6;
+      --adult-surface: #FFFFFF;
+      --adult-accent: #2D6A4F;
+      --adult-accent-light: #EAF2EE;
+      --adult-border: #E2E2DC;
+      --adult-user-bubble: #2D6A4F;
+      --adult-ai-bubble: #F0F4F2;
+      --adult-ai-text: #1A3A2A;
+
+      --kid-bg: #FFF9F0;
+      --kid-surface: #FFFFFF;
+      --kid-accent: #FF7043;
+      --kid-accent-light: #FFF0EB;
+      --kid-border: #FFD0BE;
+      --kid-user-bubble: #FF7043;
+      --kid-ai-bubble: #FFF0EB;
+      --kid-ai-text: #B34000;
+
+      --text: #1A1A1A;
+      --text-muted: #888;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.3s;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body.adult {
+      background: var(--adult-bg);
+      font-family: 'Lora', Georgia, serif;
+      --bg: var(--adult-bg);
+      --surface: var(--adult-surface);
+      --accent: var(--adult-accent);
+      --accent-light: var(--adult-accent-light);
+      --border: var(--adult-border);
+      --user-bubble: var(--adult-user-bubble);
+      --ai-bubble: var(--adult-ai-bubble);
+      --ai-text: var(--adult-ai-text);
+    }
+
+    body.kid {
+      background: var(--kid-bg);
+      font-family: 'Nunito', 'Comic Sans MS', cursive, sans-serif;
+      --bg: var(--kid-bg);
+      --surface: var(--kid-surface);
+      --accent: var(--kid-accent);
+      --accent-light: var(--kid-accent-light);
+      --border: var(--kid-border);
+      --user-bubble: var(--kid-user-bubble);
+      --ai-bubble: var(--kid-ai-bubble);
+      --ai-text: var(--kid-ai-text);
+    }
+
+    /* HEADER */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon { font-size: 20px; }
+
+    .logo-text {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+      transition: color 0.3s;
+    }
+
+    body.kid .logo-text { font-weight: 800; font-size: 18px; letter-spacing: 0; }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #new-session-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 11px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: inherit;
+      display: none;
+      transition: border-color 0.2s;
+    }
+
+    #new-session-btn.visible { display: block; }
+
+    .mode-toggle {
+      display: flex;
+      background: var(--accent-light);
+      border-radius: 20px;
+      padding: 3px;
+      gap: 2px;
+      transition: background 0.3s;
+    }
+
+    .mode-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: 16px;
+      padding: 5px 13px;
+      font-size: 12px;
+      font-weight: 400;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* MAIN */
+    main {
+      flex: 1;
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    /* WELCOME */
+    #welcome {
+      text-align: center;
+      padding: 16px 8px 4px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    #welcome h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+
+    body.kid #welcome h1 { font-weight: 800; font-size: 24px; }
+
+    #welcome p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .starters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .starter-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: var(--text);
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1.4;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .starter-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* MESSAGES */
+    .message-row {
+      display: flex;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .message-row.user { justify-content: flex-end; }
+    .message-row.assistant { justify-content: flex-start; }
+
+    .bubble {
+      max-width: 82%;
+      padding: 11px 15px;
+      font-size: 15px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+
+    .message-row.user .bubble {
+      background: var(--user-bubble);
+      color: #fff;
+      border-radius: 18px 18px 4px 18px;
+    }
+
+    .message-row.assistant .bubble {
+      background: var(--ai-bubble);
+      color: var(--ai-text);
+      border-radius: 18px 18px 18px 4px;
+    }
+
+    .ai-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 5px;
+      opacity: 0.85;
+    }
+
+    /* LOADING */
+    #loading-row {
+      display: none;
+      justify-content: flex-start;
+    }
+
+    #loading-row.visible { display: flex; }
+
+    .loading-bubble {
+      background: var(--ai-bubble);
+      border-radius: 18px 18px 18px 4px;
+      padding: 12px 16px;
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.5;
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    #scroll-anchor { height: 1px; }
+
+    /* INPUT AREA */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      position: sticky;
+      bottom: 0;
+      transition: background 0.3s, border-color 0.3s;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    .input-row {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    #message-input {
+      flex: 1;
+      resize: none;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      line-height: 1.5;
+      max-height: 140px;
+      overflow-y: auto;
+      transition: border-color 0.2s, background 0.3s;
+      -webkit-appearance: none;
+    }
+
+    #message-input:focus { border-color: var(--accent); }
+    #message-input::placeholder { color: #bbb; }
+
+    #send-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s, opacity 0.2s;
+      font-family: inherit;
+    }
+
+    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      opacity: 0.65;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-6px); }
+    }
+  </style>
+</head>
+<body class="adult">
+
+  <header>
+    <div class="logo">
+      <span class="logo-icon" id="logo-icon">◈</span>
+      <span class="logo-text" id="logo-text">IdeaSpace</span>
+    </div>
+    <div class="header-actions">
+      <button id="new-session-btn" onclick="newSession()">New session</button>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="adult-btn" onclick="setMode('adult')">Adult</button>
+        <button class="mode-btn" id="kid-btn" onclick="setMode('kid')">Kids ✨</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="chat-area">
+    <div id="welcome">
+      <h1 id="welcome-heading">What would you like to think through?</h1>
+      <p id="welcome-sub">Share an idea, problem, or question. We'll develop it together.</p>
+      <div class="starters" id="starters-container"></div>
+    </div>
+    <div id="messages"></div>
+    <div id="loading-row">
+      <div class="loading-bubble">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+    <div id="scroll-anchor"></div>
+  </main>
+
+  <footer>
+    <div class="input-row">
+      <textarea id="message-input" rows="1" placeholder="What's on your mind?"></textarea>
+      <button id="send-btn" disabled onclick="handleSend()">↑</button>
+    </div>
+    <p class="hint">Enter to send · Shift+Enter for new line</p>
+  </footer>
+
+  <script>
+    const ADULT_SYSTEM = `You are a thoughtful brainstorming partner. Your job is to help the user explore, develop, and expand their ideas.
+
+Guidelines:
+- Ask one focused follow-up question or offer 2-3 concrete directions to develop the idea further
+- Keep responses concise and conversational — this is a thinking partnership, not a lecture
+- Alternate between asking questions and offering suggestions based on what feels most useful
+- Help them uncover assumptions, spot opportunities, and think through next steps
+- When they have a strong idea, help them think about how to actually make it happen`;
+
+    const KID_SYSTEM = `You are a fun and encouraging brainstorming buddy for kids! Your job is to help them explore their ideas with excitement and creativity.
+
+Guidelines:
+- Use simple, clear language that kids can easily understand
+- Be enthusiastic and encouraging — every idea is worth exploring!
+- Ask one fun question to help them think deeper, or suggest 2-3 playful ways to develop the idea
+- Use occasional emojis to make it friendly and engaging ✨
+- Keep responses short and energetic
+- Help them think about: what would make it even cooler? who would love this? how could we make it real?
+- Never make them feel like an idea is bad — always find the interesting part`;
+
+    const ADULT_STARTERS = [
+      "A product or service I want to create",
+      "A problem I keep running into",
+      "A career move I'm considering",
+      "A creative project I want to start",
+    ];
+
+    const KID_STARTERS = [
+      "A game I want to invent 🎮",
+      "Something I wish existed ✨",
+      "A story I want to tell 📖",
+      "A way to help my community 💛",
+    ];
+
+    let mode = "adult";
+    let messages = [];
+    let loading = false;
+    let sessionStarted = false;
+
+    const textarea = document.getElementById("message-input");
+    const sendBtn = document.getElementById("send-btn");
+    const messagesEl = document.getElementById("messages");
+    const loadingRow = document.getElementById("loading-row");
+    const welcome = document.getElementById("welcome");
+    const newSessionBtn = document.getElementById("new-session-btn");
+
+    function setMode(newMode) {
+      mode = newMode;
+      document.body.className = newMode;
+      document.getElementById("adult-btn").classList.toggle("active", newMode === "adult");
+      document.getElementById("kid-btn").classList.toggle("active", newMode === "kid");
+
+      const isKid = newMode === "kid";
+      document.getElementById("logo-icon").textContent = isKid ? "🧠" : "◈";
+      document.getElementById("logo-text").textContent = isKid ? "Idea Buddy!" : "IdeaSpace";
+      document.getElementById("welcome-heading").textContent = isKid
+        ? "What's your big idea today? 🚀"
+        : "What would you like to think through?";
+      document.getElementById("welcome-sub").textContent = isKid
+        ? "Tell me your idea and we'll make it even more amazing together!"
+        : "Share an idea, problem, or question. We'll develop it together.";
+      textarea.placeholder = isKid
+        ? "What's your idea? Big or small, share it here! 🌟"
+        : "What's on your mind?";
+      sendBtn.textContent = isKid ? "🚀" : "↑";
+
+      renderStarters();
+      newSession(false);
+    }
+
+    function renderStarters() {
+      const container = document.getElementById("starters-container");
+      const starters = mode === "kid" ? KID_STARTERS : ADULT_STARTERS;
+      container.innerHTML = "";
+      starters.forEach(s => {
+        const btn = document.createElement("button");
+        btn.className = "starter-btn";
+        btn.textContent = s;
+        btn.onclick = () => { textarea.value = s; autoResize(); updateSendBtn(); textarea.focus(); };
+        container.appendChild(btn);
+      });
+    }
+
+    function newSession(showWelcome = true) {
+      messages = [];
+      sessionStarted = false;
+      messagesEl.innerHTML = "";
+      if (showWelcome) welcome.style.display = "block";
+      newSessionBtn.classList.remove("visible");
+      loadingRow.classList.remove("visible");
+    }
+
+    function updateSendBtn() {
+      sendBtn.disabled = !textarea.value.trim() || loading;
+    }
+
+    function autoResize() {
+      textarea.style.height = "auto";
+      textarea.style.height = Math.min(textarea.scrollHeight, 140) + "px";
+    }
+
+    textarea.addEventListener("input", () => { autoResize(); updateSendBtn(); });
+    textarea.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendBtn.disabled) handleSend();
+      }
+    });
+
+    function handleSend() {
+      const text = textarea.value.trim();
+      if (!text || loading) return;
+      textarea.value = "";
+      autoResize();
+      updateSendBtn();
+      send(text);
+    }
+
+    function addMessage(role, content) {
+      const row = document.createElement("div");
+      row.className = `message-row ${role}`;
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+
+      if (role === "assistant") {
+        const label = document.createElement("div");
+        label.className = "ai-label";
+        label.textContent = mode === "kid" ? "Idea Buddy ✨" : "IdeaSpace";
+        bubble.appendChild(label);
+      }
+
+      const text = document.createElement("span");
+      text.textContent = content;
+      bubble.appendChild(text);
+      row.appendChild(bubble);
+      messagesEl.appendChild(row);
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      document.getElementById("scroll-anchor").scrollIntoView({ behavior: "smooth" });
+    }
+
+    async function send(text) {
+      if (!sessionStarted) {
+        sessionStarted = true;
+        welcome.style.display = "none";
+        newSessionBtn.classList.add("visible");
+        newSessionBtn.textContent = mode === "kid" ? "Start Over 🔄" : "New session";
+      }
+
+      const userMsg = { role: "user", content: text };
+      messages.push(userMsg);
+      addMessage("user", text);
+      loading = true;
+      updateSendBtn();
+      loadingRow.classList.add("visible");
+      scrollToBottom();
+
+      const systemPrompt = mode === "kid" ? KID_SYSTEM : ADULT_SYSTEM;
+
+      try {
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 1000,
+            system: systemPrompt,
+            messages: messages,
+          }),
+        });
+
+        const data = await response.json();
+        const reply = data.content?.find(b => b.type === "text")?.text || "Something went wrong. Try again!";
+        messages.push({ role: "assistant", content: reply });
+        loadingRow.classList.remove("visible");
+        addMessage("assistant", reply);
+      } catch {
+        loadingRow.classList.remove("visible");
+        addMessage("assistant", "Something went wrong. Please check your connection and try again.");
+      } finally {
+        loading = false;
+        updateSendBtn();
+      }
+    }
+
+    // Init
+    renderStarters();
+  </script>
+</body>
+</html>
